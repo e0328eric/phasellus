@@ -36,7 +36,6 @@ enum YachtErr {
     RustylineErr(ReadlineError),
     NoNameWasGiven,
     NoArgumentWasGiven,
-    ParseNumFailed,
     InvalidPlayerName,
     InvalidScoringName,
 }
@@ -140,15 +139,16 @@ fn del_player(players: &mut Players, rest: Option<&str>) -> Result<()> {
 }
 
 // TODO: make well parser
-fn parse_rest_str(rest: &str) -> Result<(&str, &str, u16)> {
+fn parse_rest_str(rest: &str) -> Result<(&str, &str, Option<u16>)> {
     let mut iter = rest.split_whitespace();
 
     let name = iter.next().ok_or(YachtErr::InvalidPlayerName)?;
     let scoring = iter.next().ok_or(YachtErr::InvalidScoringName)?;
-    let score_num = match iter.next().ok_or(YachtErr::ParseNumFailed)? {
-        "true" | "t" => 1,
-        "false" | "f" => 0,
-        score => score.parse::<u16>().map_err(|_| YachtErr::ParseNumFailed)?,
+    let score_num = match iter.next() {
+        Some("true" | "t") => Some(1),
+        Some("false" | "f") => Some(0),
+        Some(score) => score.parse::<u16>().ok(),
+        None => None,
     };
 
     Ok((name, scoring, score_num))
@@ -160,18 +160,18 @@ fn calculate_score(players: &mut Players, rest: Option<&str>) -> Result<()> {
     let score_board = players.get_mut(name).ok_or(YachtErr::InvalidPlayerName)?;
 
     match scoring {
-        "1s" | "ones" => score_board.numbers[0] = Some(score_num),
-        "2s" | "twos" => score_board.numbers[1] = Some(score_num),
-        "3s" | "threes" => score_board.numbers[2] = Some(score_num),
-        "4s" | "fours" => score_board.numbers[3] = Some(score_num),
-        "5s" | "fives" => score_board.numbers[4] = Some(score_num),
-        "6s" | "sixes" => score_board.numbers[5] = Some(score_num),
-        "choice" | "c" => score_board.choice = Some(score_num),
-        "fullhouse" | "fh" => score_board.full_house = Some(score_num),
-        "fourcards" | "fourcard" | "fc" | "fk" => score_board.four_of_kind = Some(score_num),
-        "ss" => score_board.little_straight = Some(score_num != 0),
-        "ls" => score_board.big_straight = Some(score_num != 0),
-        "yacht" | "y" => score_board.yacht = Some(score_num != 0),
+        "1s" | "ones" => score_board.numbers[0] = score_num,
+        "2s" | "twos" => score_board.numbers[1] = score_num,
+        "3s" | "threes" => score_board.numbers[2] = score_num,
+        "4s" | "fours" => score_board.numbers[3] = score_num,
+        "5s" | "fives" => score_board.numbers[4] = score_num,
+        "6s" | "sixes" => score_board.numbers[5] = score_num,
+        "choice" | "c" => score_board.choice = score_num,
+        "fullhouse" | "fh" => score_board.full_house = score_num,
+        "fourcards" | "fourcard" | "fc" | "fk" => score_board.four_of_kind = score_num,
+        "ss" => score_board.little_straight = Some(score_num != Some(0)),
+        "ls" => score_board.big_straight = Some(score_num != Some(0)),
+        "yacht" | "y" => score_board.yacht = Some(score_num != Some(0)),
         "fuck" | "fucked" => score_board.yacht = Some(false),
         _ => return Err(YachtErr::InvalidScoringName),
     }
