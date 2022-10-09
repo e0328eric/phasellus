@@ -76,6 +76,7 @@ fn main() -> Result<()> {
                     "show" => Ok(show_scores(&players)),
                     "score" => calculate_score(&mut players, rest),
                     "reset" => reset_score(&mut players, rest),
+                    "clear" => Ok(clear_score(&mut players)),
                     "help" | "h" => Ok(display_help()),
                     "import" => todo!("Not support yet"),
                     "export" => unimplemented!(),
@@ -168,11 +169,10 @@ fn calculate_score(players: &mut Players, rest: Option<&str>) -> Result<()> {
         "choice" | "c" => score_board.choice = Some(score_num),
         "fullhouse" | "fh" => score_board.full_house = Some(score_num),
         "fourcards" | "fourcard" | "fc" | "fk" => score_board.four_of_kind = Some(score_num),
-        "littlestraight" | "lts" | "ls" => score_board.little_straight = Some(score_num != 0),
-        "largestraight" | "bigstraight" | "las" | "bs" => {
-            score_board.big_straight = Some(score_num != 0)
-        }
+        "ss" => score_board.little_straight = Some(score_num != 0),
+        "ls" => score_board.big_straight = Some(score_num != 0),
         "yacht" | "y" => score_board.yacht = Some(score_num != 0),
+        "fuck" | "fucked" => score_board.yacht = Some(false),
         _ => return Err(YachtErr::InvalidScoringName),
     }
 
@@ -221,6 +221,12 @@ fn calculate_score(players: &mut Players, rest: Option<&str>) -> Result<()> {
     Ok(())
 }
 
+fn clear_score(players: &mut Players) {
+    for (_, player) in players.iter_mut() {
+        *player = Scoreboard::default();
+    }
+}
+
 fn reset_score(players: &mut Players, rest: Option<&str>) -> Result<()> {
     let (name, scoring, _) = parse_rest_str(rest.ok_or(YachtErr::NoArgumentWasGiven)?)?;
     let score_board = players.get_mut(name).ok_or(YachtErr::InvalidPlayerName)?;
@@ -235,8 +241,8 @@ fn reset_score(players: &mut Players, rest: Option<&str>) -> Result<()> {
         "choice" | "c" => score_board.choice = None,
         "full_house" | "fullhouse" | "fh" => score_board.full_house = None,
         "fourcards" | "fourcard" | "fc" | "fk" => score_board.four_of_kind = None,
-        "littlestraight" | "lts" | "ls" => score_board.little_straight = None,
-        "largestraight" | "bigstraight" | "las" | "bs" => score_board.big_straight = None,
+        "ss" => score_board.little_straight = None,
+        "ls" => score_board.big_straight = None,
         "yacht" | "y" => score_board.yacht = None,
         "all" => *score_board = Scoreboard::default(),
         _ => return Err(YachtErr::InvalidScoringName),
@@ -458,7 +464,7 @@ impl Display for PrettyPrinter<'_> {
         write!(
             f,
             "| {:^width$} |",
-            "little straight",
+            "small straight",
             width = MOST_LEFT_PADDING
         )?;
         for (_, score_board) in &self.info {
@@ -479,7 +485,7 @@ impl Display for PrettyPrinter<'_> {
         write!(
             f,
             "| {:^width$} |",
-            "big straight",
+            "large straight",
             width = MOST_LEFT_PADDING
         )?;
         for (_, score_board) in &self.info {
@@ -566,8 +572,8 @@ fn display_help() {
     println!("    | choice, c");
     println!("    | fullhouse, fh");
     println!("    | fourcards, fourcard, fc, fk");
-    println!("    | littlestraight, lts, ls");
-    println!("    | largestraight, bigstraight, las, bs");
+    println!("    | bs");
+    println!("    | ls");
     println!("    | yacht, y\n");
     println!("reset [username] [mod]: reset score to the user");
     println!("<mod list>");
@@ -580,8 +586,8 @@ fn display_help() {
     println!("    | choice, c");
     println!("    | fullhouse, fh");
     println!("    | fourcards, fourcard, fc, fk");
-    println!("    | littlestraight, lts, ls");
-    println!("    | largestraight, bigstraight, las, bs");
+    println!("    | ss");
+    println!("    | ls");
     println!("    | yacht, y");
     println!("    | all\n");
     println!("import: import informations from the excel file");
