@@ -54,7 +54,6 @@ impl From<ReadlineError> for YachtErr {
 
 fn main() -> Result<()> {
     let mut rl = Editor::<()>::new()?;
-
     let mut players = Players::new();
 
     loop {
@@ -73,7 +72,7 @@ fn main() -> Result<()> {
                     "addplayer" | "aplayer" | "ap" => add_player(&mut players, rest),
                     "delplayer" | "dplayer" | "dp" => del_player(&mut players, rest),
                     "show" => Ok(show_scores(&players)),
-                    "score" => calculate_score(&mut players, rest),
+                    "score" | "s" => calculate_score(&mut players, rest),
                     "reset" => reset_score(&mut players, rest),
                     "clear" => Ok(clear_score(&mut players)),
                     "help" | "h" => Ok(display_help()),
@@ -172,7 +171,7 @@ fn calculate_score(players: &mut Players, rest: Option<&str>) -> Result<()> {
         "ss" => score_board.little_straight = Some(score_num != Some(0)),
         "ls" => score_board.big_straight = Some(score_num != Some(0)),
         "yacht" | "y" => score_board.yacht = Some(score_num != Some(0)),
-        "fuck" | "fucked" => score_board.yacht = Some(false),
+        "fuck" | "fucked" | "faq" => score_board.yacht = Some(false),
         _ => return Err(YachtErr::InvalidScoringName),
     }
 
