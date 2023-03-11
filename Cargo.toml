@@ -1,10 +1,10 @@
 [package]
 name = "phasellus"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 description = "A yacht game scoreboard"
 license = "MIT"
 
 [dependencies]
-rustyline = { version = "10.0.0", features = ["signal-hook"] }
+rustyline = { version = "11.0", features = ["signal-hook"] }
 unicode-width = "0.1.10"

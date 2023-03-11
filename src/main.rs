@@ -1,9 +1,11 @@
+#![allow(clippy::unit_arg)]
+
 use std::collections::HashMap;
 use std::fmt::{self, Display, Write};
 use std::io;
 
 #[allow(unused_imports)]
-use rustyline::{error::ReadlineError, Editor};
+use rustyline::{error::ReadlineError, DefaultEditor};
 use unicode_width::UnicodeWidthStr;
 
 const PROMPT: &str = ">> ";
@@ -38,6 +40,8 @@ enum YachtErr {
     NoArgumentWasGiven,
     InvalidPlayerName,
     InvalidScoringName,
+    TooManyDice,
+    InvalidDiceNumGiven,
 }
 
 impl From<std::io::Error> for YachtErr {
@@ -53,7 +57,7 @@ impl From<ReadlineError> for YachtErr {
 }
 
 fn main() -> Result<()> {
-    let mut rl = Editor::<()>::new()?;
+    let mut rl = DefaultEditor::new()?;
     let mut players = Players::new();
 
     loop {
@@ -61,7 +65,7 @@ fn main() -> Result<()> {
 
         match readline {
             Ok(line) => {
-                rl.add_history_entry(line.as_str());
+                rl.add_history_entry(line.as_str())?;
                 let (command, rest) = if let Some((command, rest)) = line.trim().split_once(' ') {
                     (command, Some(rest))
                 } else {
@@ -139,14 +143,28 @@ fn del_player(players: &mut Players, rest: Option<&str>) -> Result<()> {
 
 // TODO: make well parser
 fn parse_rest_str(rest: &str) -> Result<(&str, &str, Option<u16>)> {
-    let mut iter = rest.split_whitespace();
+    let mut iter = rest.split_whitespace().peekable();
 
     let name = iter.next().ok_or(YachtErr::InvalidPlayerName)?;
     let scoring = iter.next().ok_or(YachtErr::InvalidScoringName)?;
-    let score_num = match iter.next() {
+    let score_num = match iter.peek().copied() {
         Some("true" | "t") => Some(1),
         Some("false" | "f") => Some(0),
-        Some(score) => score.parse::<u16>().ok(),
+        Some(_) => {
+            let mut output: u16 = 0;
+            for (idx, num_str) in iter.enumerate() {
+                if idx >= 5 {
+                    return Err(YachtErr::TooManyDice);
+                }
+
+                output += if let Ok(num) = num_str.parse::<u16>() {
+                    num
+                } else {
+                    return Err(YachtErr::InvalidDiceNumGiven);
+                };
+            }
+            Some(output)
+        }
         None => None,
     };
 
@@ -171,7 +189,7 @@ fn calculate_score(players: &mut Players, rest: Option<&str>) -> Result<()> {
         "ss" => score_board.little_straight = Some(score_num != Some(0)),
         "ls" => score_board.big_straight = Some(score_num != Some(0)),
         "yacht" | "y" => score_board.yacht = Some(score_num != Some(0)),
-        "fuck" | "fucked" | "faq" => score_board.yacht = Some(false),
+        "faq" => score_board.yacht = Some(false),
         _ => return Err(YachtErr::InvalidScoringName),
     }
 
