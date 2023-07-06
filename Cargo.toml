@@ -1,10 +1,18 @@
 [package]
 name = "phasellus"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 description = "A yacht game scoreboard"
 license = "MIT"
 
-[dependencies]
-rustyline = { version = "11.0", features = ["signal-hook"] }
-unicode-width = "0.1.10"
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 'z'
+panic = "abort"
+strip = true
+
+[dependencies.cursive]
+version = "0.20"
+default-features = false
+features = ["crossterm-backend"]
