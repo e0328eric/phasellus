@@ -1,9 +1,10 @@
 [package]
+authors = ["Sungbae Jeong <almagest0328@gmail.com>"]
+description = "A yacht game scoreboard"
+edition = "2021"
+license = "MIT"
 name = "phasellus"
 version = "0.4.0"
-edition = "2021"
-description = "A yacht game scoreboard"
-license = "MIT"
 
 [profile.release]
 codegen-units = 1
