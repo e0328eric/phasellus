@@ -208,27 +208,51 @@ impl View for PlayBoard {
 
             printer.print(
                 (offset + 2, y_offset + 3),
-                &format!("{}", scoreboard.numbers[0]),
+                &if let Some(num) = scoreboard.numbers[0] {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 4),
-                &format!("{}", scoreboard.numbers[1]),
+                &if let Some(num) = scoreboard.numbers[1] {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 5),
-                &format!("{}", scoreboard.numbers[2]),
+                &if let Some(num) = scoreboard.numbers[2] {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 6),
-                &format!("{}", scoreboard.numbers[3]),
+                &if let Some(num) = scoreboard.numbers[3] {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 7),
-                &format!("{}", scoreboard.numbers[4]),
+                &if let Some(num) = scoreboard.numbers[4] {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 8),
-                &format!("{}", scoreboard.numbers[5]),
+                &if let Some(num) = scoreboard.numbers[5] {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
 
             printer.print(
@@ -242,27 +266,51 @@ impl View for PlayBoard {
 
             printer.print(
                 (offset + 2, y_offset + 13),
-                &format!("{}", scoreboard.choice),
+                &if let Some(num) = scoreboard.choice {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 14),
-                &format!("{}", scoreboard.full_house),
+                &if let Some(num) = scoreboard.full_house {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 15),
-                &format!("{}", scoreboard.four_of_kind),
+                &if let Some(num) = scoreboard.four_of_kind {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 16),
-                &format!("{}", scoreboard.small_straight),
+                &if let Some(num) = scoreboard.small_straight {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 17),
-                &format!("{}", scoreboard.large_straight),
+                &if let Some(num) = scoreboard.large_straight {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
             printer.print(
                 (offset + 2, y_offset + 18),
-                &format!("{}", scoreboard.yacht),
+                &if let Some(num) = scoreboard.yacht {
+                    format!("{num}")
+                } else {
+                    String::new()
+                },
             );
 
             printer.print(

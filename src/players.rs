@@ -12,30 +12,30 @@ const YACHT_SCORE: u16 = 50;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Scoreboard {
-    pub numbers: [u16; 6],
+    pub numbers: [Option<u16>; 6],
     pub left_to_get_bonus: u16,
     pub bonus: u16,
-    pub choice: u16,
-    pub full_house: u16,
-    pub four_of_kind: u16,
-    pub small_straight: u16,
-    pub large_straight: u16,
-    pub yacht: u16,
+    pub choice: Option<u16>,
+    pub full_house: Option<u16>,
+    pub four_of_kind: Option<u16>,
+    pub small_straight: Option<u16>,
+    pub large_straight: Option<u16>,
+    pub yacht: Option<u16>,
     pub total_score: u16,
 }
 
 impl Default for Scoreboard {
     fn default() -> Self {
         Self {
-            numbers: [0; 6],
+            numbers: [None; 6],
             left_to_get_bonus: BONUS_LIMIT,
             bonus: 0,
-            choice: 0,
-            full_house: 0,
-            four_of_kind: 0,
-            small_straight: 0,
-            large_straight: 0,
-            yacht: 0,
+            choice: None,
+            full_house: None,
+            four_of_kind: None,
+            small_straight: None,
+            large_straight: None,
+            yacht: None,
             total_score: 0,
         }
     }
@@ -117,21 +117,25 @@ impl Players {
         let scoreboard = self.players.get_mut(player_name)?;
 
         match score {
-            ScoreInput::Ones(score) => scoreboard.numbers[0] = score?,
-            ScoreInput::Twos(score) => scoreboard.numbers[1] = score?,
-            ScoreInput::Threes(score) => scoreboard.numbers[2] = score?,
-            ScoreInput::Fours(score) => scoreboard.numbers[3] = score?,
-            ScoreInput::Fives(score) => scoreboard.numbers[4] = score?,
-            ScoreInput::Sixes(score) => scoreboard.numbers[5] = score?,
-            ScoreInput::Choice(score) => scoreboard.choice = score?,
-            ScoreInput::FullHouse(score) => scoreboard.full_house = score?,
-            ScoreInput::FourOfKind(score) => scoreboard.four_of_kind = score?,
-            ScoreInput::SmallStraight => scoreboard.small_straight = SMALL_STRAIGHT_SCORE,
-            ScoreInput::LargeStraight => scoreboard.large_straight = LARGE_STRAIGHT_SCORE,
-            ScoreInput::Yacht => scoreboard.yacht = YACHT_SCORE,
+            ScoreInput::Ones(score) => scoreboard.numbers[0] = score,
+            ScoreInput::Twos(score) => scoreboard.numbers[1] = score,
+            ScoreInput::Threes(score) => scoreboard.numbers[2] = score,
+            ScoreInput::Fours(score) => scoreboard.numbers[3] = score,
+            ScoreInput::Fives(score) => scoreboard.numbers[4] = score,
+            ScoreInput::Sixes(score) => scoreboard.numbers[5] = score,
+            ScoreInput::Choice(score) => scoreboard.choice = score,
+            ScoreInput::FullHouse(score) => scoreboard.full_house = score,
+            ScoreInput::FourOfKind(score) => scoreboard.four_of_kind = score,
+            ScoreInput::SmallStraight => scoreboard.small_straight = Some(SMALL_STRAIGHT_SCORE),
+            ScoreInput::LargeStraight => scoreboard.large_straight = Some(LARGE_STRAIGHT_SCORE),
+            ScoreInput::Yacht => scoreboard.yacht = Some(YACHT_SCORE),
         }
 
-        let nums_total = scoreboard.numbers.iter().sum::<u16>();
+        let nums_total = scoreboard
+            .numbers
+            .iter()
+            .map(|num| num.unwrap_or(0))
+            .sum::<u16>();
         scoreboard.left_to_get_bonus = BONUS_LIMIT.saturating_sub(nums_total);
         scoreboard.bonus = if scoreboard.left_to_get_bonus == 0 {
             BONUS_SCORE
@@ -141,12 +145,12 @@ impl Players {
 
         scoreboard.total_score = nums_total
             + scoreboard.bonus
-            + scoreboard.choice
-            + scoreboard.full_house
-            + scoreboard.four_of_kind
-            + scoreboard.small_straight
-            + scoreboard.large_straight
-            + scoreboard.yacht;
+            + scoreboard.choice.unwrap_or(0)
+            + scoreboard.full_house.unwrap_or(0)
+            + scoreboard.four_of_kind.unwrap_or(0)
+            + scoreboard.small_straight.unwrap_or(0)
+            + scoreboard.large_straight.unwrap_or(0)
+            + scoreboard.yacht.unwrap_or(0);
 
         Some(())
     }
