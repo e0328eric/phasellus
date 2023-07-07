@@ -2,13 +2,15 @@
 
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 const BONUS_LIMIT: u16 = 63;
 const BONUS_SCORE: u16 = 35;
 const SMALL_STRAIGHT_SCORE: u16 = 15;
 const LARGE_STRAIGHT_SCORE: u16 = 30;
 const YACHT_SCORE: u16 = 50;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Scoreboard {
     pub numbers: [u16; 6],
     pub left_to_get_bonus: u16,
@@ -74,6 +76,7 @@ impl ScoreInput {
 
 type PlayerName = String;
 
+#[derive(Serialize, Deserialize)]
 pub struct Players {
     players: HashMap<PlayerName, Scoreboard>,
 }

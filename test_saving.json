@@ -1,0 +1,40 @@
+{
+  "players": {
+    "華絡み練": {
+      "numbers": [0, 0, 0, 0, 0, 0],
+      "left_to_get_bonus": 63,
+      "bonus": 0,
+      "choice": 0,
+      "full_house": 0,
+      "four_of_kind": 0,
+      "small_straight": 0,
+      "large_straight": 0,
+      "yacht": 0,
+      "total_score": 0
+    },
+    "foo": {
+      "numbers": [0, 12, 0, 0, 0, 0],
+      "left_to_get_bonus": 51,
+      "bonus": 0,
+      "choice": 23,
+      "full_house": 0,
+      "four_of_kind": 0,
+      "small_straight": 0,
+      "large_straight": 0,
+      "yacht": 0,
+      "total_score": 35
+    },
+    "한글": {
+      "numbers": [0, 0, 0, 0, 0, 0],
+      "left_to_get_bonus": 63,
+      "bonus": 0,
+      "choice": 0,
+      "full_house": 0,
+      "four_of_kind": 0,
+      "small_straight": 0,
+      "large_straight": 0,
+      "yacht": 50,
+      "total_score": 50
+    }
+  }
+}

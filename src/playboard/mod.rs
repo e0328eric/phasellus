@@ -4,6 +4,8 @@ mod infobox;
 
 use std::cell::Cell;
 use std::cmp;
+use std::fs;
+use std::io::{BufReader, BufWriter};
 
 use cursive::{
     event::{Event, EventResult, Key},
@@ -12,6 +14,7 @@ use cursive::{
     views::{Button, Dialog, EditView, LinearLayout, OnEventView, TextView},
     Cursive, Printer, Vec2,
 };
+use unicode_width::UnicodeWidthStr;
 
 use crate::players::{Players, ScoreInput};
 
@@ -166,9 +169,8 @@ impl View for PlayBoard {
         let y_offset = self.y_offset.get();
         let mut offset = self.x_offset.get() + self.username_offset.get();
 
-        // TODO: Support UTF-8 name
         for (player, scoreboard) in self.players.iter() {
-            let name_offset = cmp::max(player.len() + 3, MIN_PLAYER_NAME_OFFSET);
+            let name_offset = str_terminal_len(player);
 
             // Draw lines
             for i in 1..name_offset {
@@ -268,7 +270,7 @@ impl View for PlayBoard {
                 &format!("{}", scoreboard.total_score),
             );
 
-            offset += cmp::max(player.len() + 3, MIN_PLAYER_NAME_OFFSET);
+            offset += str_terminal_len(player);
         }
     }
 
@@ -285,56 +287,18 @@ impl View for PlayBoard {
                     play_board.players.clear_score();
                 });
             }),
-            Event::Char('a') => EventResult::with_cb_once(move |siv| {
-                siv.add_layer(
-                    Dialog::new().title("Add Player").content(
-                        LinearLayout::vertical()
-                            .child(TextView::new("Input a player name to add"))
-                            .child(
-                                OnEventView::new(
-                                    EditView::new()
-                                        .on_submit(|s, _| update_player(s))
-                                        .with_name("add_player_name"),
-                                )
-                                .on_event(Key::Esc, |s| {
-                                    s.pop_layer();
-                                }),
-                            )
-                            .child(
-                                LinearLayout::horizontal()
-                                    .child(Button::new("Ok", update_player))
-                                    .child(Button::new("Cancel", |s| {
-                                        s.pop_layer();
-                                    })),
-                            ),
-                    ),
-                );
-            }),
-            Event::Char('d') => EventResult::with_cb_once(move |siv| {
-                siv.add_layer(
-                    Dialog::new().title("Delete Player").content(
-                        LinearLayout::vertical()
-                            .child(TextView::new("Input a player name to remove"))
-                            .child(
-                                OnEventView::new(
-                                    EditView::new()
-                                        .on_submit(|s, _| delete_player(s))
-                                        .with_name("del_player_name"),
-                                )
-                                .on_event(Key::Esc, |s| {
-                                    s.pop_layer();
-                                }),
-                            )
-                            .child(
-                                LinearLayout::horizontal()
-                                    .child(Button::new("Ok", delete_player))
-                                    .child(Button::new("Cancel", |s| {
-                                        s.pop_layer();
-                                    })),
-                            ),
-                    ),
-                );
-            }),
+            Event::Char('a') => make_popup!(
+                "add_player_name",
+                "Add Player",
+                "Give a player name to add",
+                add_player
+            ),
+            Event::Char('d') => make_popup!(
+                "del_player_name",
+                "Delete Player",
+                "Give a player name to remove",
+                delete_player
+            ),
             Event::Char('1') => score_event!("Ones", ScoreInput::Ones(None)),
             Event::Char('2') => score_event!("Twos", ScoreInput::Twos(None)),
             Event::Char('3') => score_event!("Threes", ScoreInput::Threes(None)),
@@ -344,108 +308,49 @@ impl View for PlayBoard {
             Event::Char('c') => score_event!("Choice", ScoreInput::Choice(None)),
             Event::Char('h') => score_event!("Full House", ScoreInput::FullHouse(None)),
             Event::Char('k') => score_event!("Four of a Kind", ScoreInput::FourOfKind(None)),
-            Event::Char('s') => EventResult::with_cb_once(move |siv| {
-                siv.add_layer(
-                    Dialog::new().title("Small Straight").content(
-                        LinearLayout::vertical()
-                            .child(TextView::new("Input the player name"))
-                            .child(
-                                OnEventView::new(
-                                    EditView::new()
-                                        .on_submit(move |s, _| {
-                                            update_player_score(s, ScoreInput::SmallStraight)
-                                        })
-                                        .with_name("update_player_score"),
-                                )
-                                .on_event(Key::Esc, |s| {
-                                    s.pop_layer();
-                                }),
-                            )
-                            .child(
-                                LinearLayout::horizontal()
-                                    .child(Button::new("Ok", move |s| {
-                                        update_player_score(s, ScoreInput::SmallStraight)
-                                    }))
-                                    .child(Button::new("Cancel", |s| {
-                                        s.pop_layer();
-                                    })),
-                            ),
-                    ),
-                );
-            }),
-            Event::Char('l') => EventResult::with_cb_once(move |siv| {
-                siv.add_layer(
-                    Dialog::new().title("Large Straight").content(
-                        LinearLayout::vertical()
-                            .child(TextView::new("Input the player name"))
-                            .child(
-                                OnEventView::new(
-                                    EditView::new()
-                                        .on_submit(move |s, _| {
-                                            update_player_score(s, ScoreInput::LargeStraight)
-                                        })
-                                        .with_name("update_player_score"),
-                                )
-                                .on_event(Key::Esc, |s| {
-                                    s.pop_layer();
-                                }),
-                            )
-                            .child(
-                                LinearLayout::horizontal()
-                                    .child(Button::new("Ok", move |s| {
-                                        update_player_score(s, ScoreInput::LargeStraight)
-                                    }))
-                                    .child(Button::new("Cancel", |s| {
-                                        s.pop_layer();
-                                    })),
-                            ),
-                    ),
-                );
-            }),
-            Event::Char('y') => EventResult::with_cb_once(move |siv| {
-                siv.add_layer(
-                    Dialog::new().title("* YACHT *").content(
-                        LinearLayout::vertical()
-                            .child(TextView::new("Input the player name"))
-                            .child(
-                                OnEventView::new(
-                                    EditView::new()
-                                        .on_submit(move |s, _| {
-                                            update_player_score(s, ScoreInput::Yacht)
-                                        })
-                                        .with_name("update_player_score"),
-                                )
-                                .on_event(Key::Esc, |s| {
-                                    s.pop_layer();
-                                }),
-                            )
-                            .child(
-                                LinearLayout::horizontal()
-                                    .child(Button::new("Ok", move |s| {
-                                        update_player_score(s, ScoreInput::Yacht)
-                                    }))
-                                    .child(Button::new("Cancel", |s| {
-                                        s.pop_layer();
-                                    })),
-                            ),
-                    ),
-                );
-            }),
+            Event::Char('s') => make_popup!(
+                "update_player_score",
+                "Small Straight",
+                "Input the player name",
+                move |s| update_player_score(s, ScoreInput::SmallStraight)
+            ),
+            Event::Char('l') => make_popup!(
+                "update_player_score",
+                "Large Straight",
+                "Input the player name",
+                move |s| update_player_score(s, ScoreInput::LargeStraight)
+            ),
+            Event::Char('y') => make_popup!(
+                "update_player_score",
+                "* YACHT *",
+                "Input the player name",
+                move |s| update_player_score(s, ScoreInput::Yacht)
+            ),
+            Event::CtrlChar('s') => make_popup!(
+                "save_data_filename",
+                "Save as",
+                "Give a filename to save",
+                save_data
+            ),
+            Event::CtrlChar('l') => make_popup!(
+                "load_data_path",
+                "Load as",
+                "Give a path of saved JSON file",
+                load_data
+            ),
             _ => EventResult::Ignored,
         }
     }
 }
 
-fn update_player(siv: &mut Cursive) {
+fn add_player(siv: &mut Cursive) {
     let player_name = siv.call_on_name("add_player_name", |view: &mut EditView| view.get_content());
 
     if let Some(name) = player_name {
         siv.call_on_name("playboard", |play_board: &mut PlayBoard| {
             play_board.players.add_player(&name);
             let width = play_board.width.get();
-            play_board
-                .width
-                .set(width + cmp::max(name.len() + 3, MIN_PLAYER_NAME_OFFSET));
+            play_board.width.set(width + str_terminal_len(&name));
         });
     }
 
@@ -461,7 +366,7 @@ fn delete_player(siv: &mut Cursive) {
                 let width = play_board.width.get();
                 play_board
                     .width
-                    .set(width.saturating_sub(cmp::max(name.len() + 3, MIN_PLAYER_NAME_OFFSET)));
+                    .set(width.saturating_sub(str_terminal_len(&name)));
                 play_board.players.del_player(&name)
             })
             .expect("`playboard` must exists");
@@ -533,4 +438,83 @@ fn update_player_score(siv: &mut Cursive, score: ScoreInput) {
     }
 
     siv.pop_layer();
+}
+
+fn save_data(siv: &mut Cursive) {
+    let filename = siv.call_on_name("save_data_filename", |view: &mut EditView| {
+        view.get_content()
+    });
+
+    if let Some(filename) = filename {
+        let file = fs::File::create(&*filename).map_err(|err| err.to_string());
+        let result = siv.call_on_name("playboard", move |play_board: &mut PlayBoard| {
+            file.and_then(|f| {
+                let buf_writer = BufWriter::new(f);
+                serde_json::to_writer(buf_writer, &play_board.players)
+                    .map_err(|err| err.to_string())
+            })
+        });
+
+        match result.unwrap() {
+            Ok(()) => {}
+            Err(err) => {
+                siv.add_layer(
+                    OnEventView::new(Dialog::new().title("ERROR").content(TextView::new(err)))
+                        .on_event('q', |s| {
+                            s.pop_layer();
+                        })
+                        .on_event(Key::Enter, |s| {
+                            s.pop_layer();
+                        }),
+                );
+                siv.pop_layer();
+            }
+        }
+    }
+
+    siv.pop_layer();
+}
+
+fn load_data(siv: &mut Cursive) {
+    let filepath = siv.call_on_name("load_data_path", |view: &mut EditView| view.get_content());
+
+    if let Some(filepath) = filepath {
+        let file = fs::File::open(&*filepath).map_err(|err| err.to_string());
+        let result = siv.call_on_name("playboard", move |play_board: &mut PlayBoard| {
+            file.and_then(|f| {
+                let buf_reader = BufReader::new(f);
+                let players = match serde_json::from_reader::<_, Players>(buf_reader) {
+                    Ok(players) => players,
+                    Err(err) => return Err(err.to_string()),
+                };
+
+                play_board.players = players;
+
+                Ok(())
+            })
+        });
+
+        match result.unwrap() {
+            Ok(()) => {}
+            Err(err) => {
+                siv.add_layer(
+                    OnEventView::new(Dialog::new().title("ERROR").content(TextView::new(err)))
+                        .on_event('q', |s| {
+                            s.pop_layer();
+                        })
+                        .on_event(Key::Enter, |s| {
+                            s.pop_layer();
+                        }),
+                );
+                siv.pop_layer();
+            }
+        }
+    }
+
+    siv.pop_layer();
+}
+
+#[inline]
+fn str_terminal_len(s: &str) -> usize {
+    cmp::max(UnicodeWidthStr::width_cjk(s) + 3, MIN_PLAYER_NAME_OFFSET)
 }

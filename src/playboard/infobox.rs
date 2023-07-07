@@ -5,7 +5,7 @@ use cursive::{
     Printer, Vec2,
 };
 
-const INFOBOX_INNER_SIZE: (usize, usize) = (45, 20);
+const INFOBOX_INNER_SIZE: (usize, usize) = (45, 24);
 
 pub(super) struct InfoBox;
 
@@ -31,7 +31,11 @@ impl View for InfoBox {
         printer.print((2, 15), "y: add score at yacht");
         printer.print((2, 16), "C: clear all scores");
 
-        printer.print((2, 18), "Press `q` to close this help message");
+        printer.print((2, 18), "<Save and Load datas>");
+        printer.print((2, 19), "Ctrl-s: save the data into JSON files");
+        printer.print((2, 20), "Ctrl-l: load the data from JSON files");
+
+        printer.print((2, 22), "Press `q` to close this help message");
     }
 
     fn required_size(&mut self, _: Vec2) -> Vec2 {
