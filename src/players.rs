@@ -52,9 +52,9 @@ pub enum ScoreInput {
     Choice(Option<u16>),
     FullHouse(Option<u16>),
     FourOfKind(Option<u16>),
-    SmallStraight,
-    LargeStraight,
-    Yacht,
+    SmallStraight(bool),
+    LargeStraight(bool),
+    Yacht(bool),
 }
 
 impl ScoreInput {
@@ -126,9 +126,13 @@ impl Players {
             ScoreInput::Choice(score) => scoreboard.choice = score,
             ScoreInput::FullHouse(score) => scoreboard.full_house = score,
             ScoreInput::FourOfKind(score) => scoreboard.four_of_kind = score,
-            ScoreInput::SmallStraight => scoreboard.small_straight = Some(SMALL_STRAIGHT_SCORE),
-            ScoreInput::LargeStraight => scoreboard.large_straight = Some(LARGE_STRAIGHT_SCORE),
-            ScoreInput::Yacht => scoreboard.yacht = Some(YACHT_SCORE),
+            ScoreInput::SmallStraight(b) => {
+                scoreboard.small_straight = Some(if b { SMALL_STRAIGHT_SCORE } else { 0 })
+            }
+            ScoreInput::LargeStraight(b) => {
+                scoreboard.large_straight = Some(if b { LARGE_STRAIGHT_SCORE } else { 0 })
+            }
+            ScoreInput::Yacht(b) => scoreboard.yacht = Some(if b { YACHT_SCORE } else { 0 }),
         }
 
         let nums_total = scoreboard

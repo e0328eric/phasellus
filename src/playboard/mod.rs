@@ -360,19 +360,37 @@ impl View for PlayBoard {
                 "update_player_score",
                 "Small Straight",
                 "Input the player name",
-                move |s| update_player_score(s, ScoreInput::SmallStraight)
+                move |s| update_player_score(s, ScoreInput::SmallStraight(true))
             ),
             Event::Char('l') => make_popup!(
                 "update_player_score",
                 "Large Straight",
                 "Input the player name",
-                move |s| update_player_score(s, ScoreInput::LargeStraight)
+                move |s| update_player_score(s, ScoreInput::LargeStraight(true))
             ),
             Event::Char('y') => make_popup!(
                 "update_player_score",
                 "* YACHT *",
                 "Input the player name",
-                move |s| update_player_score(s, ScoreInput::Yacht)
+                move |s| update_player_score(s, ScoreInput::Yacht(true))
+            ),
+            Event::Char('S') => make_popup!(
+                "update_player_score",
+                "Small Straight",
+                "Input the player name",
+                move |s| update_player_score(s, ScoreInput::SmallStraight(false))
+            ),
+            Event::Char('L') => make_popup!(
+                "update_player_score",
+                "Large Straight",
+                "Input the player name",
+                move |s| update_player_score(s, ScoreInput::LargeStraight(false))
+            ),
+            Event::Char('Y') => make_popup!(
+                "update_player_score",
+                "* YACHT *",
+                "Input the player name",
+                move |s| update_player_score(s, ScoreInput::Yacht(false))
             ),
             Event::CtrlChar('s') => make_popup!(
                 "save_data_filename",
@@ -543,7 +561,14 @@ fn load_data(siv: &mut Cursive) {
         });
 
         match result.unwrap() {
-            Ok(()) => {}
+            Ok(()) => {
+                siv.call_on_name("playboard", |play_board: &mut PlayBoard| {
+                    for (name, _) in play_board.players.iter() {
+                        let width = play_board.width.get();
+                        play_board.width.set(width + str_terminal_len(name));
+                    }
+                });
+            }
             Err(err) => {
                 siv.add_layer(
                     OnEventView::new(Dialog::new().title("ERROR").content(TextView::new(err)))

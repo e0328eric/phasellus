@@ -4,7 +4,7 @@ description = "A yacht game scoreboard"
 edition = "2021"
 license = "MIT"
 name = "phasellus"
-version = "0.4.2"
+version = "0.4.4"
 
 [profile.release]
 codegen-units = 1

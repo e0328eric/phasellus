@@ -5,7 +5,7 @@ use cursive::{
     Printer, Vec2,
 };
 
-const INFOBOX_INNER_SIZE: (usize, usize) = (45, 24);
+const INFOBOX_INNER_SIZE: (usize, usize) = (82, 18);
 
 pub(super) struct InfoBox;
 
@@ -21,21 +21,24 @@ impl View for InfoBox {
         printer.print((2, 6), "d: delete player");
         printer.print((2, 7), "q: quit this program");
 
-        printer.print((2, 9), "<Score Related Keybindings>");
-        printer.print((2, 10), "1 ~ 6: add score at ones, ..., sixes");
-        printer.print((2, 11), "c: add score at choice");
-        printer.print((2, 11), "h: add score at full house");
-        printer.print((2, 12), "k: add score at four of a kind");
-        printer.print((2, 13), "s: add score at small straight");
-        printer.print((2, 14), "l: add score at large straight");
-        printer.print((2, 15), "y: add score at yacht");
-        printer.print((2, 16), "C: clear all scores");
+        printer.print((2, 9), "<Save and Load datas>");
+        printer.print((2, 10), "Ctrl-s: save the data into JSON files");
+        printer.print((2, 11), "Ctrl-l: load the data from JSON files");
 
-        printer.print((2, 18), "<Save and Load datas>");
-        printer.print((2, 19), "Ctrl-s: save the data into JSON files");
-        printer.print((2, 20), "Ctrl-l: load the data from JSON files");
+        printer.print((43, 4), "<Score Related Keybindings>");
+        printer.print((43, 5), "1 ~ 6: add score at ones, ..., sixes");
+        printer.print((43, 6), "c: add score at choice");
+        printer.print((43, 6), "h: add score at full house");
+        printer.print((43, 7), "k: add score at four of a kind");
+        printer.print((43, 8), "s: add score at small straight");
+        printer.print((43, 9), "l: add score at large straight");
+        printer.print((43, 10), "y: add score at yacht");
+        printer.print((43, 11), "s: add score at small straight");
+        printer.print((43, 12), "l: add score at large straight");
+        printer.print((43, 13), "y: add score at yacht");
+        printer.print((43, 14), "C: clear all scores");
 
-        printer.print((2, 22), "Press `q` to close this help message");
+        printer.print((2, 16), "Press `q` to close this help message");
     }
 
     fn required_size(&mut self, _: Vec2) -> Vec2 {
